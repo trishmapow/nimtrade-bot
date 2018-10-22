@@ -1,8 +1,6 @@
-# GoldenBot
+# Nimtrade-Bot
 
-[![HitCount](http://hits.dwyl.io/GarlicoinForum/GoldenBot.svg)](http://hits.dwyl.io/GarlicoinForum/GoldenBot)
-
-Discord bot that assists in trading of Garlicoin (GRLC). Features are:
+Discord bot that assists in trading of Nimiq (NIM). Features are:
 
 ```
 !help     : Displays a list of commands and what they do
