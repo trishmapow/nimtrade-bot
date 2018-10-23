@@ -8,6 +8,8 @@ from time import sleep, time
 from tabulate import tabulate
 from bs4 import BeautifulSoup
 
+coins = []
+
 def main():
     client = discord.Client()
     conf = configparser.RawConfigParser()
@@ -15,6 +17,22 @@ def main():
 
     BOT_TOKEN = conf.get('bot_conf', 'BOT_TOKEN')
     PRICE_CHANNEL = conf.get('bot_conf', 'PRICE_CHANNEL')
+
+    def get_rate(cur):
+        id = ""
+        for coin in coins:
+            if coin["symbol"] == cur.upper():
+                id = coin["id"]
+        if id == "":
+            return -1
+        else:
+            try:
+                r = requests.get("https://api.coinpaprika.com/v1/ticker/{}".format(id))
+            except:
+                return -1
+            else:
+                r = r.json()
+                return float(r["price_usd"])
 
     def format_num(num,dp):
         #num = float('{:.8g}'.format(num))
@@ -31,6 +49,51 @@ def main():
 
     @client.event
     async def on_message(message):
+        if message.content.startswith("!help"):
+            msg =   "!exchange - shows prices across all exchanges.\n"\
+                    "!conv [amount] [cur1] [cur2] - convert from currency 1 to 2.\n"\
+                    "!graph [1d/1w/1m] - show candle graph for selected time range."
+            await client.send_message(message.channel, "```{}```".format(msg))
+
+        if message.content.startswith("!conv"):
+            msg = message.content.replace("!conv ", "").split(" ")
+
+            try:
+                # Check if the amount sent by the user is a number
+                float(msg[0].replace(",", "."))
+            except ValueError:
+                await client.send_message(message.channel, "Error: Unable to get the amount to convert.")
+            else:
+                if len(msg) == 3:
+                    if msg[1] == msg[2]:
+                        await client.send_message(message.channel, "```js\n{0} {1} = {0} {1}```".format(msg[1], msg[0]))
+                    else:
+                        if coins == []:
+                            await client.send_message(message.channel, "Error: List of coins unavailable.")
+                        else:
+                            r1 = -1
+                            r2 = -1
+                            if msg[1].upper() == 'USD':
+                                r1 = 1
+                                r2 = get_rate(msg[2])
+                            elif msg[2].upper() == 'USD':
+                                r1 = get_rate(msg[1])
+                                r2 = 1
+                            else:
+                                r1 = get_rate(msg[1])
+                                r2 = get_rate(msg[2])
+
+                            if r1 == -1 or r2 == -1:
+                                await client.send_message(message.channel, "Symbol or API error")
+                            else:
+                                value = float(msg[0])*r1/r2
+                                value = round(value,8)
+                                await client.send_message(message.channel, "```js\n{} {} = {} {}```".format(msg[0].upper(),msg[1].upper(),value,msg[2].upper()))
+
+                else:
+                    error_txt = "Not enough parameters given : `!conv [amount] [cur1] [cur2]`"
+                    await client.send_message(message.channel, error_txt)
+
         if message.content.startswith("!graph"):
             msg = message.content.replace("!graph ", "").split(" ")
             if os.path.isfile("{}.png".format(msg[0].lower())):
@@ -100,17 +163,20 @@ def main():
                 await client.edit_message(tmp, "Error : Couldn't reach CoinMarketCap (timeout)")
 
     async def background_update():
+        global coins
         await client.wait_until_ready()
         channel = discord.Object(id=PRICE_CHANNEL)
         time = 0
 
+        try:
+            r = requests.get("https://api.coinpaprika.com/v1/coins")
+            coins = r.json()
+        except:
+            print("Could not fetch coins list")
+            coins = []
+
         while not client.is_closed:
             print("Time ", time)
-
-            for time_range in ["1d", "1w", "1m"]:
-                os.system('chromium --headless --disable-gpu --screenshot "https://bitscreener.com/coins/nimiq?timeframe={}&chart_type=candle" --window-size=1920,1080 --virtual-time-budget=25000'.format(time_range))
-                os.system('mv screenshot.png screenshot_{}.png'.format(time_range))
-                os.system('convert screenshot_{0}.png -crop 950x370+615+265 {0}.png'.format(time_range))
 
             time += 120
             await asyncio.sleep(120)

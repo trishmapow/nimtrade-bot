@@ -18,9 +18,9 @@ def grab_chart(time_range):
                        "all": 48 *60 * 60}  # Every 2 days
     while True:
         with lock:  # Using lock to be sure that 2 chromium threads won't start at the same time because they both create a screenshot.png file
-            os.system('chromium-browser --headless --disable-gpu --screenshot "https://bitscreener.com/coins/garlicoin?timeframe={}&chart_type=candle&chart_unit=usd&is_global=true" --window-size=1920,1080'.format(time_range))
+            os.system('chromium --headless --disable-gpu --screenshot "https://bitscreener.com/coins/nimiq?timeframe={}&chart_type=candle" --window-size=1920,1080 -virtual-time-budget=10000'.format(time_range))
             os.system('mv screenshot.png screenshot_{}.png'.format(time_range))
-            os.system('convert screenshot_{0}.png -crop 1213x500+343+420 {0}.png'.format(time_range))
+            os.system('convert screenshot_{0}.png -crop 950x370+615+265 {0}.png'.format(time_range))
         time.sleep(sleeping_ranges[time_range])
 
 
