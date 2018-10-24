@@ -19,7 +19,7 @@ async def main():
 
                 os.system('mv screenshot.png {}.png'.format(time_range))
                 os.system('convert {0}.png -crop 1000x370+480+265 {0}.png'.format(time_range))
-                print("Updated {} at {}".format(time_range,time.asctime(time.localtime(time.time()))
+                print("Updated {} at {}".format(time_range,time.asctime(time.localtime(time.time()))))
                 await page.close()
 
             i += 1
