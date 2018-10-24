@@ -1,6 +1,7 @@
 import asyncio
 from pyppeteer import launch
 import os
+import time
 
 async def main():
     i = 0
@@ -8,7 +9,7 @@ async def main():
     while True:
         try:
             for time_range in ["1d", "1w", "1m"]:
-                if (time_range == "1w" and not i%12==0) or (time_range == "1m" and not i%24==0):
+                if (time_range == "1w" and not i%3==0) or (time_range == "1m" and not i%6==0):
                     continue
                 page = await browser.newPage()
                 await page.setViewport({'width': 1920, 'height': 1080})
@@ -17,7 +18,9 @@ async def main():
                 await page.screenshot({'path': 'screenshot.png'})
 
                 os.system('mv screenshot.png {}.png'.format(time_range))
-                os.system('convert {0}.png -crop 950x370+500+265 {0}.png'.format(time_range))
+                os.system('convert {0}.png -crop 1000x370+480+265 {0}.png'.format(time_range))
+                print("Updated {} at {}".format(time_range,time.asctime(time.localtime(time.time()))
+                await page.close()
 
             i += 1
             await asyncio.sleep(300)
