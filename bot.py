@@ -109,7 +109,7 @@ def main():
             try:
                 ex = requests.get("https://coinmarketcap.com/currencies/nimiq/#markets", timeout=10)
                 price = requests.get("https://api.coinpaprika.com/v1/ticker/nim-nimiq", timeout=10)
-                nimex = requests.get("https://www.nimex.app/api/v1/info", timeout=10)
+                #nimex = requests.get("https://www.nimex.app/api/v1/info", timeout=10)
             except requests.Timeout:
                 ex = None
                 price = None
