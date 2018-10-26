@@ -3,3 +3,7 @@ beautifulsoup4
 tabulate
 requests
 pyppeteer
+
+plotly
+psutil
+npm install -g electron@1.8.4 orca
