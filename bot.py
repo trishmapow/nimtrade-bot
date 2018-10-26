@@ -52,7 +52,7 @@ def main():
         if message.content.startswith("!help"):
             msg =   "!exchange - shows prices across all exchanges.\n"\
                     "!conv [amount] [cur1] [cur2] - convert from currency 1 to 2.\n"\
-                    "!graph [1d/1w/1m] - show candle graph for selected time range."
+                    "!graph [3h/6h/1d/1w/1m/3m] - show candle graph for selected time range."
             await client.send_message(message.channel, "```{}```".format(msg))
 
         if message.content.startswith("!conv"):
@@ -101,7 +101,7 @@ def main():
             elif message.content == "!graph" or message.content == "!graph ":
                 await client.send_file(message.channel,"1d.png")
             else:
-                await client.send_message(message.channel, "Error: Unable to grab chart. Options are !graph [1d|1w|1m|3m|6m|all].")
+                await client.send_message(message.channel, "Error: Unable to grab chart. Options are !graph [3h/6h/1d/1w/1m/3m].")
 
         if message.content.startswith("!exchange"):
             data = []
