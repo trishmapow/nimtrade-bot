@@ -169,7 +169,7 @@ def main():
 
                 if nimex:
                     nimex = nimex.json()["table"]
-                    data.append("N", "Nimex (manual)", "NIM/ETH", "${}".format(nimex["volume_usd"]), "${}".format(nimex["last_price_usd"]))
+                    data.append(["N", "Nimex (manual)", "NIM/ETH", "${}".format(nimex["volume_usd"]), "${}".format(nimex["last_price_usd"])])
 
                 #Add extra info
                 data.append(["","","","",""])
