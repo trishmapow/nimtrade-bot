@@ -152,9 +152,11 @@ def main():
                 total_vd = round(total_vd)
                 total_v = round(total_v)
 
+                '''
                 if nimex:
                     nimex = nimex.json()["table"]
                     data.append("N", "Nimex (manual)", "NIM/ETH", "${}".format(nimex["volume_usd"]), "${}".format(nimex["last_price_usd"]))
+                '''
 
                 #Add extra info
                 data.append(["","","","",""])
