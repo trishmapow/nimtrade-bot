@@ -17,6 +17,7 @@ def main():
 
     BOT_TOKEN = conf.get('bot_conf', 'BOT_TOKEN')
     PRICE_CHANNEL = conf.get('bot_conf', 'PRICE_CHANNEL')
+    NIMIQX_KEY = conf.get('bot_conf', 'NIMIQX_KEY')
 
     def get_rate(cur):
         id = ""
@@ -52,8 +53,22 @@ def main():
         if message.content.startswith("!help"):
             msg =   "!exchange - shows prices across all exchanges.\n"\
                     "!conv [amount] [cur1] [cur2] - convert from currency 1 to 2.\n"\
-                    "!graph [3h/6h/1d/1w/1m/3m] - show candle graph for selected time range."
+                    "!graph [3h/6h/1d/1w/1m/3m] - show candle graph for selected time range.\n"\
+                    "!network - get hashrate/network statistics."
             await client.send_message(message.channel, "```{}```".format(msg))
+
+        if message.content.startswith("!network"):
+            try:
+                r = requests.get("https://api.nimiqx.com/network-stats/?api_key={}".format(NIMIQX_KEY))
+            except:
+                await client.send_message(message.channel, "Error: cannot reach Nimiqx API.")
+            else:
+                r = r.json()
+                msg = "Hashrate (GH): {}\n"\
+                      "Nim/day/kH: {}\n"\
+                      "Block height: {}\n"\
+                      "Block reward: {}".format(r["hashrate"]/1e9, r["nim_day_kh"], r["height"], r["last_reward"]/1e5)
+                await client.send_message(message.channel, "```js\n{}```".format(msg))
 
         if message.content.startswith("!conv"):
             msg = message.content.replace("!conv ", "").split(" ")
