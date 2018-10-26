@@ -109,7 +109,7 @@ def main():
             try:
                 ex = requests.get("https://coinmarketcap.com/currencies/nimiq/#markets", timeout=10)
                 price = requests.get("https://api.coinpaprika.com/v1/ticker/nim-nimiq", timeout=10)
-                #nimex = requests.get("https://www.nimex.app/api/v1/info", timeout=10)
+                nimex = requests.get("https://www.nimex.app/api/v1/info", timeout=10)
             except requests.Timeout:
                 ex = None
                 price = None
@@ -152,11 +152,9 @@ def main():
                 total_vd = round(total_vd)
                 total_v = round(total_v)
 
-                '''
                 if nimex:
                     nimex = nimex.json()["table"]
                     data.append("N", "Nimex (manual)", "NIM/ETH", "${}".format(nimex["volume_usd"]), "${}".format(nimex["last_price_usd"]))
-                '''
 
                 #Add extra info
                 data.append(["","","","",""])
