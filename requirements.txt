@@ -6,4 +6,4 @@ pyppeteer
 
 plotly
 psutil
-npm install -g electron@1.8.4 orca
+sudo npm install --unsafe-perm=true --allow-root -g electron@1.8.4 orca
