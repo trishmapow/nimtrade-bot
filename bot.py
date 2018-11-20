@@ -3,14 +3,20 @@ import requests
 import asyncio
 import configparser
 import os
+import nimiqrpc
+import pickle
+import datetime
 
 from time import sleep, time
 from tabulate import tabulate
 from bs4 import BeautifulSoup
 
 coins = []
+faucet = {}
 
 def main():
+    nimiq = nimiqrpc.NimiqApi()
+
     client = discord.Client()
     conf = configparser.RawConfigParser()
     conf.read("config.txt")
@@ -50,11 +56,55 @@ def main():
 
     @client.event
     async def on_message(message):
+        global faucet
+        if message.content.startswith("!bal"):
+            balance = round(nimiq.accounts()[0]['balance'] / 1e5,2)
+            msg = "The faucet balance is currently {}NIM.\nDonations: NQ91 J1N0 FYRL HVM4 8PJY DDJB JP4K NQJB XY2Y.".format(balance)
+            await client.send_message(message.channel, "```{}```".format(msg))
+
+        if message.content.startswith("!claim") and message.server is not None:
+            author = message.author.id
+            cur = datetime.datetime.now()
+
+            if author in faucet:
+                last_claim = faucet[author]
+                print(author, faucet, last_claim, cur)
+                allowed = (cur - last_claim).total_seconds() / 3600 >= 1
+            else:
+                allowed = True
+
+            if allowed:
+                msg = message.content.split(" ")
+                if len(msg) == 2 and len(msg[1]) == 36:
+                    b = msg[1]
+                    addr = ' '.join(b[i:i+4] for i in range(0,len(b),4))
+                elif len(msg) == 10 and len(''.join(msg[1:])) == 36:
+                    addr = ' '.join(msg[1:])
+                else:
+                    await client.send_message(message.channel, "```Usage: !claim [address]```")
+                    return
+                balance = nimiq.accounts()[0]['balance']
+                if balance > 25138:
+                    try:
+                        tx = nimiq.send_transaction('NQ91 J1N0 FYRL HVM4 8PJY DDJB JP4K NQJB XY2Y', addr, 25000, 138)
+                    except:
+                        await client.send_message(message.channel, "```Error sending TX.```")
+                    else:
+                        faucet[author] = datetime.datetime.now()
+                        await client.send_message(message.channel, "```Sent {}NIM tx:{}```".format(0.25, tx))
+                else:
+                    await client.send_message(message.channel, "```Faucet is empty!```")
+            else:
+                await client.send_message(message.channel, "```Can only claim every hour!```")
+                return
+
         if message.content.startswith("!help"):
             msg =   "!exchange - shows prices across all exchanges.\n"\
                     "!conv [amount] [cur1] [cur2] - convert from currency 1 to 2.\n"\
                     "!graph [3h/6h/1d/1w/1m/3m] - show candle graph for selected time range.\n"\
-                    "!network - get hashrate/network statistics."
+                    "!network - get hashrate/network statistics.\n"\
+                    "!bal - check balance of faucet\n"\
+                    "!claim [addr] - claim 0.25NIM per hour"
             await client.send_message(message.channel, "```{}```".format(msg))
 
         if message.content.startswith("!network"):
@@ -185,6 +235,7 @@ def main():
 
     async def background_update():
         global coins
+        global faucet
         await client.wait_until_ready()
         channel = discord.Object(id=PRICE_CHANNEL)
         time = 0
@@ -196,11 +247,7 @@ def main():
             print("Could not fetch coins list")
             coins = []
 
-        while not client.is_closed:
-            print("Time ", time)
-
-            time += 120
-            await asyncio.sleep(120)
+        #while not client.is_closed:
 
     client.loop.create_task(background_update())
     client.run(BOT_TOKEN)
