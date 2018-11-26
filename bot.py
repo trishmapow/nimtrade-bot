@@ -102,6 +102,11 @@ def main():
     async def on_message(message):
         global faucet
 
+        if message.content.startswith("!admin"):
+            if message.author.id == '218972149635874817':
+                msg = [i.name for i in list(client.servers)]
+                await client.send_message(message.channel, "```{}```".format(msg))
+
         if message.content.startswith("!bal"):
             balance = round(nimiq.accounts()[0]['balance'] / 1e5,2)
             msg = "The faucet balance is currently {}NIM.\nDonations: NQ91 J1N0 FYRL HVM4 8PJY DDJB JP4K NQJB XY2Y.".format(balance)
